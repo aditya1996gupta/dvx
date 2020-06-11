@@ -1,0 +1,107 @@
+<template>
+<div class="container-fluid">
+<h3>To Show VUEX working : Vuex is a state management pattern + library for Vue.js applications. It serves as a centralized store for all the components in an application,
+with rules ensuring that the state can only be mutated in a predictable fashion.</h3>
+  <div id="app">
+    <div class="card main-card">
+      <div class="card-block">
+        <div class="flex-container">
+          <input v-model="newTodoText" class="text form-control flex-item" />
+          <button v-on:click="addTodo" class="btn btn-primary flex-item">Add Todo</button>
+        </div>
+        <input v-model="doneFilter" type="checkbox"> Show only done</input>
+      </div>
+
+      <ul class="list-group list-group-flush">
+        <li v-for="todo in todos" :key="todo.id" class="list-group-item flex-container">
+          <p class="flex-item todo-text">{{todo.text}}</p>
+
+          <button v-on:click="toggleDone(todo)" class="btn btn-default flex-item">{{todo.done ? "Done" : "Not Done"}}</button>
+          <button v-on:click="removeTodo(todo)" class="btn btn-danger flex-item">Remove</button>
+
+        </li>
+      </ul>
+    </div>
+  </div>
+  </div>
+</template>
+
+<script>
+import store from './store'
+export default {
+  store,
+  data: function () {
+    return {
+      newTodoText: '',
+      doneFilter: false
+    }
+  },
+  methods: {
+    saveState () {
+      localStorage.setItem('todos', this.$store.getters.toJSON)
+    },
+    loadState () {
+      if (localStorage.getItem('todos')) {
+        this.$store.commit('loadJSON', localStorage.getItem('todos'))
+      }
+    },
+    addTodo () {
+      if (this.newTodoText !== '') {
+        this.$store.commit('addTodo', this.newTodoText)
+        this.newTodoText = ''
+        this.saveState()
+      }
+    },
+
+    removeTodo (todo) {
+      this.$store.commit('removeTodo', todo)
+      this.saveState()
+    },
+
+    toggleDone (todo) {
+      if (todo.done) {
+        todo.done = false
+      } else {
+        todo.done = true
+      }
+
+      this.$store.commit('updateTodo', todo)
+      this.saveState()
+    }
+  },
+  computed: {
+    todos () {
+      if (this.doneFilter) {
+        return this.$store.getters.doneTodos
+      } else {
+        return this.$store.getters.allTodos
+      }
+    }
+  },
+  mounted: function () {
+    this.loadState()
+  }
+}
+</script>
+
+<style>
+.flex-container {
+  display: flex;
+}
+
+.flex-item {
+  margin: 5px;
+}
+
+.todo-text {
+  flex-grow: 2;
+}
+
+.search-bar {
+  flex-grow: 2;
+}
+
+.main-card {
+  margin-top: 7px;
+}
+</style>
